@@ -1,9 +1,9 @@
-﻿import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import MessageBubble from "./MessageBubble";
 import ResultCards from "./ResultCards";
 
-const API = "http://localhost:5000/api/chat";
+const API = "https://curalink-backend-dabe.onrender.com/api/chat";
 
 const suggestions = [
   "Latest treatment options",

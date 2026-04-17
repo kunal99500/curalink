@@ -1,7 +1,7 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000/api/chat";
+const API = "https://curalink-backend-dabe.onrender.com/api/chat";
 
 const conditions = ["Parkinson's disease","Lung cancer","Type 2 Diabetes","Alzheimer's disease","Heart disease","Breast cancer"];
 
@@ -66,7 +66,7 @@ export default function Setup({ onSetup }) {
               <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
                 <span style={s.spinner} />  Starting session...
               </span>
-            ) : "Start Research Session →"}
+            ) : "Start Research Session ?"}
           </button>
         </form>
 
