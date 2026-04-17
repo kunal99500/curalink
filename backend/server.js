@@ -4,7 +4,12 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://curalink-99fndr1ht-kunal99500s-projects.vercel.app', 'https://*.vercel.app'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
@@ -12,7 +17,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('MongoDB error:', err));
 
 app.use('/api/chat', require('./routes/chat'));
-app.get('/health', (req, res) => res.json({ status: 'ok', model: 'mistral' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', model: 'phi3' }));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Curalink backend running on port ${PORT}`));
