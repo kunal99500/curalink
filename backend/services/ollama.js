@@ -1,10 +1,9 @@
-const axios = require('axios');
+﻿const axios = require('axios');
 
 const HF_TOKEN = process.env.HF_TOKEN;
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 
 console.log('HF_TOKEN present:', !!HF_TOKEN);
-console.log('HF_TOKEN starts with:', HF_TOKEN ? HF_TOKEN.slice(0, 5) : 'MISSING');
 
 async function generateResponse(prompt, conversationHistory = []) {
   if (HF_TOKEN) {
@@ -43,21 +42,11 @@ async function generateHuggingFace(prompt) {
 4. Important Note (recommend consulting a doctor)
 Be concise, accurate, and empathetic.`;
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: prompt }
-    ];
-
-    console.log('Calling HuggingFace API...');
+    const fullPrompt = `${systemPrompt}\n\nUser request:\n${prompt}\n\nResponse:`;
 
     const res = await axios.post(
-      'https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B-Instruct/v1/chat/completions',
-      {
-        model: 'meta-llama/Llama-3.2-3B-Instruct',
-        messages,
-        max_tokens: 700,
-        temperature: 0.3
-      },
+      'https://api-inference.huggingface.co/models/google/flan-t5-large',
+      { inputs: fullPrompt },
       {
         headers: {
           Authorization: `Bearer ${HF_TOKEN}`,
@@ -67,10 +56,13 @@ Be concise, accurate, and empathetic.`;
       }
     );
 
-    console.log('HF response status:', res.status);
-    return res.data?.choices?.[0]?.message?.content || 'Unable to generate response.';
+    console.log('HF response:', JSON.stringify(res.data).slice(0, 200));
+    const text = Array.isArray(res.data)
+      ? res.data[0]?.generated_text
+      : res.data?.generated_text;
+    return text || 'Unable to generate response.';
   } catch (err) {
-    console.error('HuggingFace error:', err.response?.status, err.response?.data, err.message);
+    console.error('HuggingFace error:', err.response?.status, JSON.stringify(err.response?.data)?.slice(0, 200), err.message);
     throw new Error('LLM service unavailable. Check HF_TOKEN.');
   }
 }
