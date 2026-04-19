@@ -3,6 +3,9 @@
 const HF_TOKEN = process.env.HF_TOKEN;
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 
+console.log('HF_TOKEN present:', !!HF_TOKEN);
+console.log('HF_TOKEN starts with:', HF_TOKEN ? HF_TOKEN.slice(0, 5) : 'MISSING');
+
 async function generateResponse(prompt, conversationHistory = []) {
   if (HF_TOKEN) {
     return await generateHuggingFace(prompt);
@@ -45,6 +48,8 @@ Be concise, accurate, and empathetic.`;
       { role: 'user', content: prompt }
     ];
 
+    console.log('Calling HuggingFace API...');
+
     const res = await axios.post(
       'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions',
       {
@@ -62,9 +67,10 @@ Be concise, accurate, and empathetic.`;
       }
     );
 
+    console.log('HF response status:', res.status);
     return res.data?.choices?.[0]?.message?.content || 'Unable to generate response.';
   } catch (err) {
-    console.error('HuggingFace error:', err.response?.status, err.message);
+    console.error('HuggingFace error:', err.response?.status, err.response?.data, err.message);
     throw new Error('LLM service unavailable. Check HF_TOKEN.');
   }
 }
