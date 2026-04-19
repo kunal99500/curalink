@@ -1,4 +1,4 @@
-﻿const axios = require('axios');
+const axios = require('axios');
 
 const HF_TOKEN = process.env.HF_TOKEN;
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
@@ -45,7 +45,7 @@ Be concise, accurate, and empathetic.`;
     const fullPrompt = `<s>[INST] ${systemPrompt}\n\n${prompt} [/INST]`;
 
     const res = await axios.post(
-      'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
+      'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
       {
         inputs: fullPrompt,
         parameters: {
