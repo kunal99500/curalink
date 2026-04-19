@@ -1,4 +1,4 @@
-﻿const axios = require('axios');
+const axios = require('axios');
 
 const HF_TOKEN = process.env.HF_TOKEN;
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
@@ -51,9 +51,9 @@ Be concise, accurate, and empathetic.`;
     console.log('Calling HuggingFace API...');
 
     const res = await axios.post(
-      'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions',
+      'https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B-Instruct/v1/chat/completions',
       {
-        model: 'mistralai/Mistral-7B-Instruct-v0.3',
+        model: 'meta-llama/Llama-3.2-3B-Instruct',
         messages,
         max_tokens: 700,
         temperature: 0.3
