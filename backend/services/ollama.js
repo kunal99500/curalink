@@ -1,13 +1,13 @@
 ﻿const axios = require('axios');
 
-const HF_TOKEN = process.env.HF_TOKEN;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 
-console.log('HF_TOKEN present:', !!HF_TOKEN);
+console.log('GROQ_API_KEY present:', !!GROQ_API_KEY);
 
 async function generateResponse(prompt, conversationHistory = []) {
-  if (HF_TOKEN) {
-    return await generateHuggingFace(prompt);
+  if (GROQ_API_KEY) {
+    return await generateGroq(prompt, conversationHistory);
   } else {
     return await generateOllama(prompt, conversationHistory);
   }
@@ -33,37 +33,43 @@ async function generateOllama(prompt, conversationHistory = []) {
   }
 }
 
-async function generateHuggingFace(prompt) {
+async function generateGroq(prompt, conversationHistory = []) {
   try {
-    const systemPrompt = `You are Curalink, an AI medical research assistant. Based on the research data provided, give a structured response with these exact sections:
+    const messages = [
+      {
+        role: 'system',
+        content: `You are Curalink, an AI medical research assistant. Based on the research data provided, give a structured response with these exact sections:
 1. Condition Overview
 2. Research Insights (cite publications by number like [Publication 1])
 3. Clinical Trials (if available)
-4. Important Note (recommend consulting a doctor)
-Be concise, accurate, and empathetic.`;
-
-    const fullPrompt = `${systemPrompt}\n\nUser request:\n${prompt}\n\nResponse:`;
+4. Important Note (always recommend consulting a doctor)
+Be concise, accurate, and empathetic.`
+      },
+      ...conversationHistory.slice(-4),
+      { role: 'user', content: prompt }
+    ];
 
     const res = await axios.post(
-      'https://api-inference.huggingface.co/models/google/flan-t5-large',
-      { inputs: fullPrompt },
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        model: 'llama3-8b-8192',
+        messages,
+        max_tokens: 700,
+        temperature: 0.3
+      },
       {
         headers: {
-          Authorization: `Bearer ${HF_TOKEN}`,
+          Authorization: `Bearer ${GROQ_API_KEY}`,
           'Content-Type': 'application/json'
         },
-        timeout: 60000
+        timeout: 30000
       }
     );
 
-    console.log('HF response:', JSON.stringify(res.data).slice(0, 200));
-    const text = Array.isArray(res.data)
-      ? res.data[0]?.generated_text
-      : res.data?.generated_text;
-    return text || 'Unable to generate response.';
+    return res.data?.choices?.[0]?.message?.content || 'Unable to generate response.';
   } catch (err) {
-    console.error('HuggingFace error:', err.response?.status, JSON.stringify(err.response?.data)?.slice(0, 200), err.message);
-    throw new Error('LLM service unavailable. Check HF_TOKEN.');
+    console.error('Groq error:', err.response?.status, JSON.stringify(err.response?.data), err.message);
+    throw new Error('LLM service unavailable.');
   }
 }
 
